@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { isAuthenticated } = require('./middleware/jwt.middleware');
+require('dotenv').config();
 
 // STATIC DATA
 // Devs Team - Import the provided files with JSON data of students and cohorts here:
@@ -35,6 +37,14 @@ app.use('/api/cohorts', cohortsRouter);
 
 const studentsRouter = require('./routes/Students.routes');
 app.use('/api/students', studentsRouter);
+
+// AUTHENTICATION ROUTES
+const authRouter = require('./routes/auth.routes');
+app.use('/auth', authRouter);
+
+// USER ROUTES
+const userRouter = require('./routes/User.route');
+app.use('/api/users', isAuthenticated, userRouter);
 
 // MIDDLEWARE FOR ERROR HANDLING
 app.use(notFoundHandler);
