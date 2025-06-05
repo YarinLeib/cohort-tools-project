@@ -1,11 +1,9 @@
 const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const PORT = 5005;
 const cors = require('cors');
 const mongoose = require('mongoose');
-const Cohorts = require('./models/cohorts.model');
-const Students = require('./models/students.model');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 // STATIC DATA
 // Devs Team - Import the provided files with JSON data of students and cohorts here:
@@ -13,7 +11,7 @@ const Students = require('./models/students.model');
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
 const app = express();
-
+const PORT = 5005;
 // MIDDLEWARE
 // Research Team - Set up CORS middleware here:
 // ...
@@ -26,25 +24,22 @@ app.use(cors());
 // ROUTES - https://expressjs.com/en/starter/basic-routing.html
 // Devs Team - Start working on the routes here:
 // ...
+
+// ROOT ROUTE
 app.get('/', (req, res) => {
   res.send('Welcome to the Cohort Tools API');
 });
-app.get('/api/cohorts', async (req, res) => {
-  try {
-    const allCohorts = await Cohorts.find();
-    res.json(allCohorts);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching cohorts' });
-  }
-});
-app.get('/api/students', async (req, res) => {
-  try {
-    const allStudents = await Students.find();
-    res.json(allStudents);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching students' });
-  }
-});
+
+const cohortsRouter = require('./routes/Cohort.routes');
+app.use('/api/cohorts', cohortsRouter);
+
+const studentsRouter = require('./routes/Students.routes');
+app.use('/api/students', studentsRouter);
+
+// MIDDLEWARE FOR ERROR HANDLING
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 // DATABASE CONNECTION
 mongoose
   .connect('mongodb://0.0.0.0:27017/cohort-tools-api')
